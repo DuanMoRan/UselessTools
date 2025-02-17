@@ -6,7 +6,6 @@ import pygetwindow as gw
 scroll_enabled = False
 caps_lock_pressed = False
 start_y = 0
-click_count = 0
 last_click_time = 0
 lock = threading.Lock()
 
@@ -15,25 +14,20 @@ def is_active_window():
     return active_window is not None
 
 def on_click(x, y, button, pressed):
-    global scroll_enabled, start_y, click_count, last_click_time
+    global scroll_enabled, start_y, last_click_time
     
-    if pressed :
-        if button == mouse.Button.left:
-            click_count += 1
-            current_time = time.time()
-            if click_count == 1:
-                last_click_time = current_time
-            elif click_count == 2 and (current_time - last_click_time) <= 0.3:
-                click_count = 0
-                scroll_enabled = caps_lock_pressed and is_active_window()
-        else:
-            click_count = 1
+    with lock :
+        if pressed :
+            if scroll_enabled and button  == mouse.Button.left:
+                scroll_enabled = False
+                return
+                
+            if button == mouse.Button.left and  not scroll_enabled:
+                scroll_enabled = True
+                start_y = y
+                
+            
 
-        if caps_lock_pressed and is_active_window():
-            scroll_enabled = True
-            start_y = y
-        else:
-            scroll_enabled = False
 
 def on_press(key):
     global caps_lock_pressed, scroll_enabled
