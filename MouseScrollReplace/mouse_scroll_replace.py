@@ -11,13 +11,13 @@ lock = threading.Lock()
 
 def is_active_window():
     active_window = gw.getActiveWindow()
-    return active_window is not None
+    return active_window
 
 def on_click(x, y, button, pressed):
-    global scroll_enabled, start_y, last_click_time
+    global scroll_enabled, start_y, last_click_time , caps_lock_pressed
     
     with lock :
-        if pressed :
+        if pressed and caps_lock_pressed:
             if scroll_enabled and button  == mouse.Button.left:
                 scroll_enabled = False
                 return
@@ -47,11 +47,18 @@ def on_release(key):
     
 
 def scroll_mouse():
-    global start_y
-
+    global start_y , scroll_enabled , caps_lock_pressed
+    last_active_window = None
+    
     while True:
+        current_active_window = is_active_window()
         with lock :
-            if scroll_enabled and caps_lock_pressed and is_active_window():
+            if current_active_window !=  last_active_window :
+                scroll_enabled = False
+                caps_lock_pressed = False
+                last_active_window = current_active_window
+            
+            if scroll_enabled and caps_lock_pressed:
                 current_y = mouse.Controller().position[1]
                 delta_y = current_y - start_y
 
@@ -60,7 +67,7 @@ def scroll_mouse():
                     mouse.Controller().scroll(0, delta_y / 20)
                 start_y = current_y
             
-        time.sleep(0.01)
+        time.sleep(0.05)
 
 
 
