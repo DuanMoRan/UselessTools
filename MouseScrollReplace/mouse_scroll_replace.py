@@ -39,9 +39,10 @@ def on_press(key):
     global caps_lock_pressed, scroll_enabled
     if key == keyboard.Key.caps_lock:
         caps_lock_pressed = True
-        
-    if key == keyboard.Key.esc:
-        scroll_enabled = False
+    
+    with lock :    
+        if key == keyboard.Key.esc:
+            scroll_enabled = False
 
 def on_release(key):
     global scroll_enabled, caps_lock_pressed
@@ -61,6 +62,7 @@ def scroll_mouse():
                 delta_y = current_y - start_y
 
                 if delta_y != 0:
+                    # 可以在delta_y前添加 - 实现反向滚动，通过调节除数控制滚动速度，越大越慢。
                     mouse.Controller().scroll(0, delta_y / 20)
                 start_y = current_y
             
