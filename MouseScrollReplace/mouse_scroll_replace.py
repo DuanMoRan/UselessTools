@@ -34,9 +34,9 @@ def on_press(key):
     if key == keyboard.Key.caps_lock:
         caps_lock_pressed = True
     
-    with lock :    
-        if key == keyboard.Key.esc:
-            scroll_enabled = False
+    if key == keyboard.Key.esc:
+        mouse_listener.stop()
+        keyboard_listener.stop()
 
 def on_release(key):
     global scroll_enabled, caps_lock_pressed
